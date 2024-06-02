@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>question site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h5 {
+            text-align: right;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 30px);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px; /* 수정된 부분 */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .answers-heading {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-weight: normal;
+        }
+    </style>
+    {% include 'navigation.html' %}
+</head>
+<body>
+    <div class="container">
+        <h1 class="answers-heading">로그인</h1>
+        <form action="/api/user/login" method="POST"> <!-- 수정된 부분 -->
+            <label for="username">사용자 이름</label>
+            <input type="text" id="username" name="username">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password">
+            <button type="button" onclick="Login()">로그인</button>
+        </form>
+    </div>
+    <script>        
+        function Login() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+
+            if (!username.trim() || !password.trim()) {
+                alert('빈 값은 허용되지 않습니다.');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/user/login", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText);
+                        window.location.href = "/api/question/list";
+                    } else if (xhr.status === 401) {
+                        alert("아이디 혹은 비밀번호가 일치하지 않습니다.");
+                    }
+                } // 이 부분 수정
+            }; // 이 부분 수정
+            
+            var urlEncodedData = "";
+            for (var pair of formData.entries()) {
+                urlEncodedData += encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1]) + '&';
+            }
+            urlEncodedData = urlEncodedData.slice(0, -1); // 마지막 '&' 제거
+
+            
+            xhr.send(urlEncodedData);
+
+
+        }
+    </script>
+</body>
+</html>

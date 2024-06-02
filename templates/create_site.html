@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>question site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h5 {
+            text-align: right;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 30px);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px; /* 수정된 부분 */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .answers-heading {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-weight: normal;
+        }
+    </style>
+    {% include 'navigation.html' %}
+</head>
+<body>
+    <div class="container">
+        <h1 class="answers-heading">회원 가입</h1>
+        <form>
+            <label for="username">사용자 이름</label>
+            <input type="text" id="username" name="username">
+            <label for="password1">비밀번호</label>
+            <input type="password" id="password1" name="password1">
+            <label for="password2">비밀번호 확인</label>
+            <input type="password" id="password2" name="password2">
+            <label for="email">이메일</label>
+            <input type="text" id="email" name="email">
+            <button type="button" onclick="SignUp()">등록하기</button>
+        </form>
+    </div>
+    <script>        
+        function SignUp() {
+            var username = document.getElementById("username").value;
+            var password1 = document.getElementById("password1").value;
+            var password2 = document.getElementById("password2").value;
+            var email = document.getElementById("email").value;
+
+            if (!username.trim() || !password1.trim() || !password2.trim() || !email.trim()) {
+                alert('빈 값은 허용되지 않습니다.');
+                return;
+            }
+
+            var data = {
+                "username" : username,
+                "password1" : password1,
+                "password2" : password2,
+                "email" : email
+            };
+
+            var jsonData = JSON.stringify(data);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/user/create", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText);
+                        window.location.href = "/api/question/list";
+                    } else if (xhr.status === 409) {
+                        console.log(xhr.responseText);
+                        alert("이미 존재하는 사용자입니다.");
+                    } else if (password1 !== password2 ){
+                        console.log(xhr.responseText);
+                        alert("비밀번호가 일치하지 않습니다.");
+                    } else {
+                        alert('유효하지 않은 이메일 주소입니다.');
+                    }
+                }
+            };
+            xhr.send(jsonData);
+        }
+    </script>
+</body>
+</html>

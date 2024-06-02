@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question List</title>
+    {% include 'navigation.html' %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #28a745;
+            color: #fff;
+            font-weight: bold;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        button {
+            margin-top: 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* 테이블의 선을 없애는 스타일 */
+        table th:first-child,
+        table td:first-child {
+            border-left: none;
+        }
+        table th:last-child,
+        table td:last-child {
+            border-right: none;
+        }
+        /* 페이지 이동 버튼 스타일 */
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 0 4px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .pagination a:hover {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .pagination .active {
+            background-color: #28a745;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>글쓴이</th>
+                <th>작성일시</th>
+            </tr>
+            {% for question in question_list|sort(attribute='id', reverse=true) %}
+                <tr>
+                    <td>{{ (page) * size + loop.index }}</td>
+                    <td><a href="/api/question/detail/{{ question.id }}">{{ question.subject }}</a>{% if question.answers|length > 0 %}
+                <span  style="color: red;" class="small mx-2">{{ question.answers|length }}</span>
+                {% endif %}</td>
+                    <td>{{ question.user.username }}</td>
+                    <td>{{ question.create_date.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        
+        <!-- 페이지 이동 버튼 추가 -->
+        <div class="pagination">
+            {% if page > 0 %}
+                <a href="/api/question/list?page={{ page - 1 }}&size={{ size }}">이전</a>
+            {% endif %}
+            
+            {% for i in range(start_page, end_page) %}
+                {% set display_page = i + 1 %}
+                <a href="/api/question/list?page={{ i }}&size={{ size }}" {% if page == i %}class="active"{% endif %}>{{ display_page }}</a>
+            {% endfor %}
+            
+            {% if page < (total // size) %}
+                <a href="/api/question/list?page={{ page + 1 }}&size={{ size }}">다음</a>
+            {% endif %}
+        </div>
+        
+        <button id="createQuestionButton" onclick="redirectToCreateSite()">질문 등록</button>
+    </div>
+    
+    <script>
+        function redirectToCreateSite() {
+            window.location.href = "/api/question/create_site";
+        }
+        
+        // 서버에서 사용자 정보를 확인하여 버튼 활성화 여부 결정
+        window.onload = function() {
+            var user = {% if user %} true {% else %} false {% endif %};
+            var createQuestionButton = document.getElementById('createQuestionButton');
+            if (!user) {
+                createQuestionButton.disabled = true;
+                createQuestionButton.style.backgroundColor = '#6c757d';
+                createQuestionButton.style.cursor = 'not-allowed';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!-- index.html -->
+<nav style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 10px 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <a href="/api/question/list" class="nav-brand" style="text-decoration: none; color: #343a40; font-weight: bold;">KANG</a>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+            {% if user %}
+            <li style="display: inline-block; margin-left: 20px;"><a href="/api/user/logout" style="text-decoration: none; color: #343a40; font-weight: bold;">로그아웃</a></li>
+            {% else %}
+            <li style="display: inline-block; margin-left: 20px;"><a href="/api/user/create" style="text-decoration: none; color: #343a40; font-weight: bold;">회원가입</a></li>
+            <li style="display: inline-block; margin-left: 20px;"><a href="/api/user/login" style="text-decoration: none; color: #343a40; font-weight: bold;">로그인</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>question site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h5 {
+            text-align: right;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            margin-bottom: 20px;
+            resize: none;
+            font-size: 16px;
+        }
+        button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px; /* 수정된 부분 */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .answers-heading {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-weight: normal;
+        }
+    </style>
+    {% include 'navigation.html' %}
+</head>
+<body>
+    <div class="container">
+        <h1 class = "answers-heading">질문 수정</h1>
+        <form id="updateForm">
+            <input type="hidden" id="question_id" name="question_id" value="{{ text.id }}">
+            <h3>제목</h3>
+            <textarea id="subject" name="subject" rows="4" placeholder="질문 제목을 입력해주세요" style="width: calc(100% - 30px);">{{ text.subject }}</textarea>
+            <h3>내용</h3>
+            <textarea id="content" name="content" rows="8" placeholder="질문 내용을 입력해주세요" style="width: calc(100% - 30px);">{{ text.content }}</textarea>
+            <button type="button" onclick="submitForm()">수정하기</button>
+        </form>
+        
+    </div>
+    <script>
+        function submitForm() {
+            var questionId = document.getElementById("question_id").value;
+            var subject = document.getElementById("subject").value;
+            var content = document.getElementById("content").value;
+        
+            if (!content.trim() || !subject.trim()) {
+                alert("질문 내용과 제목을 모두 입력해주세요.");
+                return;
+            }
+        
+            var data = {
+                "question_id": questionId,
+                "subject": subject,
+                "content": content
+            };
+        
+            var jsonData = JSON.stringify(data);
+        
+            var xhr = new XMLHttpRequest();
+            xhr.open("PUT", "/api/question/update", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 204) {
+                        alert("질문이 성공적으로 수정되었습니다.");
+                        window.location.href = "/api/question/list";
+                    } else {
+                        alert("질문 수정에 실패하였습니다.");
+                    }
+                }
+            };
+            xhr.send(jsonData);
+        }
+        
+    </script>
+</body>
+</html>

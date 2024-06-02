@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Detail</title>
+    {% include 'navigation.html' %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            margin-bottom: 20px;
+        }
+        .answer-box {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .answer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;    
+        }
+        .question-content {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* 수정 */
+            word-wrap: break-word; /* 추가 */
+            overflow: hidden; /* 추가 */
+        }
+        
+        .create-date {
+            font-size: 14px;
+            color: #666;
+            margin-left: auto
+        }
+        .answers-heading {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        textarea {
+            width: calc(100% - 22px); /* Subtract border and padding width */
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            resize: none;
+            font-size: 16px;
+        }
+        .disabled-button {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: not-allowed;
+            font-size: 16px;
+        }
+        .disabled-button:hover {
+            background-color: #6c757d;
+        }
+        .enabled-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .enabled-button:hover {
+            background-color: #0056b3;
+        }
+        .edit-button {
+            padding: 15px 20px; /* 수정 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ text.subject }}</h1>
+        <div class="question-content">
+            <span>{{ text.content }}</span>
+            {% if text.modify_date %}
+                <span class="create-date">{{text.user.username}} - {{ text.modify_date.strftime("%Y-%m-%d %H:%M:%S") }}</span>
+            {% else %}
+                <span class="create-date">{{text.user.username}} - {{ text.create_date.strftime("%Y-%m-%d %H:%M:%S") }}</span>
+            {% endif %}
+        </div>
+        <div class="edit-button">
+            {% if user and user.id == text.user.id %}
+                <form id="deleteForm">
+                    <button type= "button" onclick="redirectToEditPage()">수정</button>
+                    <input type="hidden" id="delete_question_id" name="question_id" value="{{ text.id }}">
+                    <button type="button" onclick="redirectToDelete()">삭제</button>
+                </form>
+            {% endif %}
+        </div>
+        <button onclick="redirectToQuestionList()" class="enabled-button">목록으로</button>
+        {% set answer_count = text.answers|length %}
+        <h3 class="answers-heading">{{ answer_count }}개의 답변이 있습니다</h3>
+
+        <ul>
+            {% for item in text.answers %}
+                <li>
+                    <div class="answer-box">
+                        <div class="answer-content">
+                            <span>{{ item.content }}</span>
+                            <span class="create-date">{{item.user.username}} - {{ item.create_date.strftime("%Y-%m-%d %H:%M:%S") }}</span>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <form>
+            <textarea id="content" name="content" rows="6" placeholder="Your Answer"></textarea>
+            {% if user %}
+                <button type="button" class="enabled-button" onclick="submitForm()">등록</button>
+            {% else %}
+                <button type="button" class="disabled-button" disabled>등록</button>
+            {% endif %}
+        </form>
+    </div>
+
+    <script>
+        function submitForm() {
+            var content = document.getElementById("content").value;
+
+            if (!content.trim()) {
+                alert("답변을 입력해주세요.");
+                return;
+            }
+
+            var data = {
+                "content": content
+            };
+
+            var jsonData = JSON.stringify(data);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/answer/create/{{ text.id }}", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.responseText);
+                    window.location.reload();
+                }
+            };
+            xhr.send(jsonData);
+        }
+
+        function redirectToQuestionList() {
+            var previousPage = document.referrer;
+            var currentPage = window.location.href;
+    
+            if (previousPage && previousPage.includes("/api/question/list")) {
+                window.location.href = previousPage;
+            } else {
+                window.location.href = "/api/question/list";
+            }
+        }
+
+        function redirectToEditPage() {
+            window.location.href = "/api/question/modify/{{ text.id }}";
+        }
+
+
+        function redirectToDelete() {
+            if (confirm("정말로 이 질문을 삭제하시겠습니까?")) {
+                var questionId = document.getElementById("delete_question_id").value;
+        
+                var data = {
+                    "question_id": questionId
+                };
+        
+                var jsonData = JSON.stringify(data);
+        
+                var xhr = new XMLHttpRequest();
+                xhr.open("DELETE", "/api/question/delete", true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 204) {
+                            alert("질문이 성공적으로 삭제되었습니다.");
+                            window.location.href = "/api/question/list";
+                        } else {
+                            alert("질문 삭제에 실패하였습니다.");
+                        }
+                    }
+                };
+                xhr.send(jsonData);
+            }
+        }
+        
+    </script>
+</body>
+</html>
