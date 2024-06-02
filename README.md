@@ -3,8 +3,11 @@
 ## 게시판
 
 배포: fly.io
+
 프레임워크: Fastapi, jinja2
+
 데이터베이스: postgres
+
 
 ![image](https://github.com/KANGSEONGGU4/Noticeboard/assets/132239219/70fa3a36-bbf0-47b9-ba24-141f887e998a)
 
